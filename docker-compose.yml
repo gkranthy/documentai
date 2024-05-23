@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db-docai
+      - DB_NAME=devdb-docai
+      - DB_USER=devuser-docai
+      - DB_PASSWORD=changeme-docai
+    depends_on:
+      - db-docai
+
+  db-docai:
+    image: postgres:13.2-alpine
+    volumes:
+      - dev-db-docai-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb-docai
+      - POSTGRES_USER=devuser-docai
+      - POSTGRES_PASSWORD=changeme-docai
+
+volumes:
+  dev-db-docai-data:
